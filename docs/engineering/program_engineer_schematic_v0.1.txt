@@ -1,0 +1,491 @@
+Ex Origine — Program Engineer Schematic (v0.1)
+Type: Engineering Implementation Map
+OMA Alignment: A1 → A5
+
+
+1. Purpose
+
+This document translates the Ex Origine vision and project wireframe into an engineering-facing schematic.
+
+It defines the major program components, execution order, module responsibilities, data boundaries, and development priorities required to begin implementation.
+
+
+2. Engineering Objective
+
+Build a modular real-time simulation framework where:
+
+- Systems are independently testable
+- Runtime behavior is deterministic when required
+- Data drives rules and configuration
+- State changes are logged and traceable
+- Emergent complexity arises from interacting subsystems
+
+
+3. Core Runtime Stack
+
+Application Entry
+    ↓
+Configuration Loader
+    ↓
+Simulation Controller
+    ↓
+Tick Scheduler
+    ↓
+System Registry
+    ↓
+Core Systems
+    - Energy System
+    - Information System
+    - Entity System
+    - Environment System
+    - Interaction System
+    ↓
+State Manager
+    ↓
+Logger / Replay / Save System
+    ↓
+Visualization / Interface Layer
+
+
+4. Primary Program Components
+
+4.1 Application Entry
+
+Responsibility:
+- Start the program
+- Load configuration
+- Initialize runtime services
+- Start simulation loop
+
+Suggested Files:
+core/app/main.cpp
+core/app/application.cpp
+core/app/application.h
+
+
+4.2 Configuration Loader
+
+Responsibility:
+- Load JSON/YAML/TOML configuration files
+- Validate system settings
+- Provide runtime constants to systems
+
+Suggested Files:
+core/config/config_loader.cpp
+core/config/config_loader.h
+
+Data Files:
+data/configs/simulation_config.json
+data/configs/system_defaults.json
+
+
+4.3 Simulation Controller
+
+Responsibility:
+- Own the main simulation lifecycle
+- Start, pause, resume, stop, reset
+- Coordinate system update order
+
+Suggested Files:
+core/simulation/simulation_controller.cpp
+core/simulation/simulation_controller.h
+
+
+4.4 Tick Scheduler
+
+Responsibility:
+- Advance simulation by fixed timestep
+- Maintain tick count
+- Enforce deterministic update order
+
+Suggested Files:
+core/tick/tick_scheduler.cpp
+core/tick/tick_scheduler.h
+
+
+4.5 System Registry
+
+Responsibility:
+- Register active systems
+- Enable or disable systems
+- Provide controlled access between systems
+
+Suggested Files:
+core/registry/system_registry.cpp
+core/registry/system_registry.h
+
+
+5. Core Simulation Systems
+
+5.1 Energy System
+
+Responsibility:
+- Track energy values
+- Apply transfer rules
+- Apply decay rules
+- Enforce energy cost requirements
+
+Inputs:
+- Entity action requests
+- Environment constraints
+- Player influence events
+
+Outputs:
+- Updated energy states
+- Energy availability reports
+- Energy transfer logs
+
+Suggested Files:
+systems/energy/energy_system.cpp
+systems/energy/energy_system.h
+systems/energy/energy_pool.cpp
+systems/energy/energy_pool.h
+systems/energy/energy_rules.json
+
+
+5.2 Information System
+
+Responsibility:
+- Store state changes
+- Track memory and signals
+- Maintain pattern history
+
+Inputs:
+- Entity observations
+- Environmental changes
+- Interaction results
+
+Outputs:
+- Updated information state
+- Signals available to entities
+- Memory records
+
+Suggested Files:
+systems/information/information_system.cpp
+systems/information/information_system.h
+systems/information/state_memory.cpp
+systems/information/state_memory.h
+
+
+5.3 Entity System
+
+Responsibility:
+- Manage agents/entities
+- Process perception
+- Select actions
+- Request energy usage
+- Submit interaction events
+
+Inputs:
+- Energy availability
+- Information signals
+- Environment data
+
+Outputs:
+- Action requests
+- Movement requests
+- State updates
+
+Suggested Files:
+systems/entity/entity_system.cpp
+systems/entity/entity_system.h
+systems/entity/entity.cpp
+systems/entity/entity.h
+systems/entity/behavior_model.cpp
+systems/entity/behavior_model.h
+
+
+5.4 Environment System
+
+Responsibility:
+- Maintain spatial structure
+- Store resource distribution
+- Apply environmental constraints
+
+Inputs:
+- Energy flow results
+- Entity actions
+- Interaction events
+
+Outputs:
+- Updated world state
+- Resource maps
+- Spatial constraints
+
+Suggested Files:
+systems/environment/environment_system.cpp
+systems/environment/environment_system.h
+systems/environment/world_grid.cpp
+systems/environment/world_grid.h
+
+
+5.5 Interaction System
+
+Responsibility:
+- Resolve collisions
+- Resolve influence effects
+- Apply transformation rules between systems
+
+Inputs:
+- Entity action requests
+- Environment state
+- Energy state
+- Information state
+
+Outputs:
+- Final resolved state changes
+- Transformation events
+- Conflict resolution logs
+
+Suggested Files:
+systems/interaction/interaction_system.cpp
+systems/interaction/interaction_system.h
+systems/interaction/interaction_event.cpp
+systems/interaction/interaction_event.h
+
+
+6. Shared Runtime Services
+
+6.1 State Manager
+
+Responsibility:
+- Store authoritative simulation state
+- Provide snapshots
+- Track state diffs
+
+Suggested Files:
+core/state/state_manager.cpp
+core/state/state_manager.h
+core/state/simulation_state.cpp
+core/state/simulation_state.h
+
+
+6.2 Event Bus
+
+Responsibility:
+- Route events between systems
+- Prevent direct hard coupling
+- Preserve event order
+
+Suggested Files:
+core/events/event_bus.cpp
+core/events/event_bus.h
+core/events/event_types.h
+
+
+6.3 Logger
+
+Responsibility:
+- Record tick events
+- Record state diffs
+- Record errors and diagnostics
+
+Suggested Files:
+core/logging/simulation_logger.cpp
+core/logging/simulation_logger.h
+
+
+6.4 Replay System
+
+Responsibility:
+- Reconstruct simulation from seed and event log
+- Support deterministic playback
+
+Suggested Files:
+core/replay/replay_system.cpp
+core/replay/replay_system.h
+
+
+7. Simulation Update Order
+
+Each simulation tick should follow this order:
+
+1. Begin Tick
+2. Read queued player/system inputs
+3. Update Energy System
+4. Update Information System
+5. Update Entity System
+6. Resolve Interactions
+7. Update Environment System
+8. Commit state changes
+9. Write logs and diffs
+10. End Tick
+
+
+8. Data Ownership Rules
+
+Energy System owns:
+- Energy pools
+- Transfer rules
+- Energy availability
+
+Information System owns:
+- Signals
+- Memory
+- Pattern history
+
+Entity System owns:
+- Entity definitions
+- Behavior state
+- Action intent
+
+Environment System owns:
+- Spatial data
+- Terrain/resource layout
+- Environmental constraints
+
+Interaction System owns:
+- Cross-system resolution
+- Final interaction outcomes
+
+State Manager owns:
+- Authoritative committed state
+
+
+9. Engineering Constraints
+
+- No system directly mutates another system's private state
+- All cross-system changes pass through events or state commits
+- No entity action executes without energy validation
+- Every tick must be reproducible from seed plus input log
+- All major rules must be configurable through data files
+- Every system must support isolated unit tests
+
+
+10. Minimum Viable Engineering Build
+
+Version: v0.0.1
+
+Goal:
+Create a working simulation loop with one simple entity, one energy pool, and logged tick updates.
+
+Required Features:
+- Application starts
+- Configuration loads
+- Fixed tick loop runs
+- Energy system updates
+- Entity consumes energy
+- State manager records changes
+- Logger writes tick output
+- Program exits cleanly
+
+Not Required Yet:
+- Graphics
+- AI
+- Complex environment
+- Multiplayer
+- UI
+- Advanced physics
+
+
+11. Suggested Build Order
+
+Phase 1:
+- Folder structure
+- Application entry
+- Config loader
+- Tick scheduler
+
+Phase 2:
+- State manager
+- Logger
+- Event bus
+
+Phase 3:
+- Energy system
+- Entity system
+- Basic interaction loop
+
+Phase 4:
+- Environment system
+- Information system
+
+Phase 5:
+- Replay system
+- Visualization hooks
+
+
+12. Suggested Folder Structure
+
+/ex_origine/
+
+core/
+  app/
+  config/
+  simulation/
+  tick/
+  registry/
+  state/
+  events/
+  logging/
+  replay/
+
+systems/
+  energy/
+  information/
+  entity/
+  environment/
+  interaction/
+
+data/
+  configs/
+  schemas/
+  rules/
+  seeds/
+
+runtime/
+  logs/
+  saves/
+  replays/
+
+interface/
+  visualization/
+  controls/
+
+tests/
+  unit/
+  integration/
+
+docs/
+  vision/
+  architecture/
+  systems/
+  engineering/
+
+
+13. Initial Engineering File Targets
+
+docs/engineering/program_engineer_schematic_v0.1.txt
+
+core/app/main.cpp
+core/app/application.cpp
+core/app/application.h
+
+core/config/config_loader.cpp
+core/config/config_loader.h
+
+core/simulation/simulation_controller.cpp
+core/simulation/simulation_controller.h
+
+core/tick/tick_scheduler.cpp
+core/tick/tick_scheduler.h
+
+core/state/state_manager.cpp
+core/state/state_manager.h
+
+systems/energy/energy_system.cpp
+systems/energy/energy_system.h
+
+systems/entity/entity_system.cpp
+systems/entity/entity_system.h
+
+
+14. Patch Log
+
+v0.1
+- Created engineering schematic
+- Defined runtime stack
+- Defined core components
+- Defined system ownership boundaries
+- Defined minimum viable build
+- Established suggested build order
