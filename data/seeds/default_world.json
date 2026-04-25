@@ -1,0 +1,9 @@
+{
+  "version": "0.1",
+  "description": "Default world seed — minimal initial conditions for an empty simulation.",
+  "initial_energy": 100.0,
+  "initial_entities": 0,
+  "regions": [
+    { "resource_level": 1.0, "energy_cap": 50.0 }
+  ]
+}

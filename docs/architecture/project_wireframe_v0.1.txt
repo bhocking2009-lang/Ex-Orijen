@@ -1,0 +1,211 @@
+Ex Origine — Project Wireframe (v0.1)
+Type: Architectural Skeleton
+OMA Alignment: A1 → A5
+
+
+1. High-Level Architecture
+
+PLAYER LAYER (A4)
+- Observer / Influencer / Architect Interface
+
+        ↓
+
+SIMULATION CONTROL (A3)
+- Tick Manager
+- Scheduler
+
+        ↓
+
+CORE SYSTEMS (A2)
+- Energy System
+- Information System
+- Entity System
+
+        ↓
+
+SUPPORT SYSTEMS
+- Environment System
+- Interaction System
+
+        ↓
+
+DATA LAYER (A5)
+- Persistence
+- Logging
+- Replay
+- Versioning
+
+
+2. Core System Breakdown
+
+Energy System
+- Defines energy units and conservation
+- Handles flow, decay, transformation
+
+Information System
+- Stores all state
+- Tracks memory and patterns
+
+Entity System
+- Defines agents
+- Handles behavior and decisions
+
+Environment System
+- Defines spatial structure
+- Manages resources
+
+Interaction System
+- Resolves system-to-system effects
+
+
+3. Simulation Tick Flow
+
+FOR each tick:
+
+1. Input Phase
+   - Player influence applied
+   - External modifiers injected
+
+2. Energy Update
+   - Flow
+   - Transfer
+   - Decay
+
+3. Information Update
+   - State propagation
+   - Memory updates
+
+4. Entity Update
+   - Perception
+   - Decision
+   - Action
+
+5. Interaction Resolution
+   - Collisions
+   - Transformations
+
+6. Environment Update
+   - Resource redistribution
+   - Structural change
+
+7. Persistence Layer
+   - Log state
+   - Save diffs
+
+END
+
+
+4. Module Boundaries
+
+Each system must be:
+- Self-contained
+- Data-driven
+- Replaceable
+
+Example:
+
+EnergySystem/
+    energy_core.cpp
+    energy_rules.json
+    energy_flow_solver.cpp
+
+
+5. Folder Structure
+
+/ex_origine/
+
+docs/
+  vision/
+  architecture/
+    project_wireframe_v0.1.txt
+  systems/
+
+core/
+  simulation_controller/
+  tick_system/
+
+systems/
+  energy/
+  information/
+  entity/
+  environment/
+  interaction/
+
+data/
+  configs/
+  schemas/
+  seeds/
+
+runtime/
+  logs/
+  saves/
+  replays/
+
+interface/
+  visualization/
+  controls/
+
+tests/
+
+
+6. Data Flow
+
+Energy enables Entity actions
+Entity generates Information
+Information influences Entity decisions
+Environment constrains Energy flow
+Interaction modifies all systems
+
+
+7. Player Layer
+
+Player does not directly control entities.
+
+Capabilities:
+- Inject energy
+- Modify parameters
+- Introduce constraints
+- Observe outcomes
+
+Modes:
+- Observer (read-only)
+- Influencer (soft changes)
+- Architect (rule modification)
+
+
+8. Persistence & Replay
+
+System must support:
+- Full logging
+- Deterministic replay
+- State diffing
+
+Enables:
+- Time rewind
+- Alternate timelines
+- Debugging emergence
+
+
+9. Design Constraints
+
+- No system bypasses energy rules
+- No entity acts without energy cost
+- No state change without traceability
+- No hardcoded behavior without data equivalent
+
+
+10. What This Enables
+
+- Independent system development
+- Isolated subsystem testing
+- Scalable architecture
+- Evolution without rewrites
+
+
+Patch Log
+
+v0.1
+- Established architecture
+- Defined systems and flow
+- Created folder structure
+- Linked to OMA layers

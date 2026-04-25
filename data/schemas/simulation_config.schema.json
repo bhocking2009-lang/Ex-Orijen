@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SimulationConfig",
+  "type": "object",
+  "required": ["version", "tick_rate_hz"],
+  "properties": {
+    "version": { "type": "string" },
+    "tick_rate_hz": { "type": "number", "minimum": 1 },
+    "deterministic_seed": { "type": "integer" },
+    "max_entities": { "type": "integer", "minimum": 1 },
+    "enable_logging": { "type": "boolean" },
+    "enable_replay": { "type": "boolean" }
+  }
+}

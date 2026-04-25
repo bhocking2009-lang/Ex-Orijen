@@ -1,0 +1,23 @@
+# Build artifacts
+*.o
+*.a
+*.so
+*.dylib
+smoke_tests
+smoke_tests.exe
+
+# Runtime output (generated at runtime, not committed)
+runtime/logs/*
+runtime/saves/*
+runtime/replays/*
+!runtime/logs/.gitkeep
+!runtime/saves/.gitkeep
+!runtime/replays/.gitkeep
+
+# IDE / editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
