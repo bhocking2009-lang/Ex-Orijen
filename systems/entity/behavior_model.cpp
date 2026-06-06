@@ -1,13 +1,32 @@
 #include "behavior_model.h"
 
-BehaviorResult BehaviorModel::evaluate(const Entity& entity) const {
-    // Rule: if the entity has enough energy, take a basic action at a fixed cost.
-    // Thresholds and costs must be externalised to data files in a future iteration.
-    const double threshold  = 0.1;
-    const double actionCost = 0.01;
+BehaviorModel::BehaviorModel(double minActionEnergy,
+                             double moveCost,
+                             double harvestCost,
+                             double observeCost)
+    : minActionEnergy_(minActionEnergy),
+      moveCost_(moveCost),
+      harvestCost_(harvestCost),
+      observeCost_(observeCost) {}
 
-    if (!entity.isAlive() || entity.energyReserve < threshold) {
-        return {false, 0.0, "none"};
+BehaviorResult BehaviorModel::evaluate(const Entity& entity,
+                                       const BehaviorContext& context) const {
+    if (!entity.isAlive() || entity.energyReserve < minActionEnergy_) {
+        return {false, 0.0, "rest"};
     }
-    return {true, actionCost, "basic_action"};
+
+    const float seekMargin = 0.05f;
+    if (context.bestNeighborResource > context.currentResource + seekMargin &&
+        (context.bestDx != 0 || context.bestDy != 0)) {
+        return {true, moveCost_, "seek_energy", context.bestDx, context.bestDy,
+                context.bestNeighborResource};
+    }
+
+    if (context.currentResource > 0.5f || context.influenceBias > 0.0) {
+        return {true, harvestCost_, "harvest_resource", 0, 0,
+                context.currentResource + context.influenceBias};
+    }
+
+    return {true, observeCost_, "observe_pattern", 0, 0,
+            context.currentResource};
 }
