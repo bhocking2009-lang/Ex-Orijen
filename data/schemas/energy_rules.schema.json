@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EnergyRules",
+  "type": "object",
+  "required": ["version", "decay_rate", "flow_coefficient", "conservation_enforced"],
+  "properties": {
+    "version": { "type": "string" },
+    "description": { "type": "string" },
+    "decay_rate": { "type": "number", "minimum": 0 },
+    "flow_coefficient": { "type": "number", "minimum": 0, "maximum": 1 },
+    "min_energy_threshold": { "type": "number" },
+    "conservation_enforced": { "type": "boolean" }
+  }
+}

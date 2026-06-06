@@ -1,0 +1,9 @@
+{
+  "version": "0.1",
+  "description": "Top-level simulation configuration.",
+  "tick_rate_hz": 20,
+  "deterministic_seed": 0,
+  "max_entities": 10000,
+  "enable_logging": true,
+  "enable_replay": true
+}

@@ -1,0 +1,127 @@
+Ex Origine — Core Project Definition (v0.1)
+Document Type: Vision + Direction
+OMA Layer Alignment: A1 (Foundational Intent) → informs A2–A5
+
+
+1. Project Statement
+
+Ex Origine is a modular real-time simulation framework that models the emergence of complexity from first principles.
+
+It is not simply a game—it is a system where physics, information, and decision-making co-evolve, allowing players to guide, observe, or influence the unfolding of structured reality from its most primitive states.
+
+The project is built on the Orijen Mathematical Architecture (OMA), ensuring that all mechanics—energy, matter, behavior, and intelligence—derive from consistent, traceable rules rather than arbitrary game systems.
+
+At its core, Ex Origine answers a single question:
+
+What happens when a world is allowed to become?
+
+
+2. Defining Goals
+
+2.1 Foundational Goals (A1–A2 Alignment)
+
+- Emergence over scripting
+  Systems must produce outcomes through interaction, not predefined events.
+
+- Consistency across scales
+  The same underlying rules apply from particle-level simulation to macro structures.
+
+- Traceable causality
+  Every state change should be explainable through prior conditions and system rules.
+
+- Modularity by design
+  Every system exists as an independent, replaceable module.
+
+
+2.2 Simulation Goals (A2–A3 Alignment)
+
+- Energy as the universal currency
+  All processes consume and transform energy.
+
+- Information as structure
+  Patterns, memory, and intelligence emerge from information persistence.
+
+- Dynamic equilibrium
+  Systems stabilize and destabilize naturally.
+
+- Non-linear evolution
+  Small changes can produce large consequences.
+
+
+2.3 Player Interaction Goals (A3–A4 Alignment)
+
+- Indirect control over direct command
+  The player influences systems rather than micromanaging units.
+
+- Multiple modes of engagement
+  Observer (watch)
+  Influencer (nudge)
+  Architect (modify rules)
+
+- Meaningful intervention
+  Player actions ripple through systems.
+
+
+2.4 Technical Goals (A4–A5 Alignment)
+
+- Deterministic simulation core (when required)
+- Scalable performance architecture
+- Versioned system evolution
+- Data-first design
+
+
+3. Narrative Vision Statement
+
+Ex Origine is not a story that is told.
+It is a story that forms.
+
+There is no predetermined civilization, no scripted conflict, no guaranteed outcome.
+Instead, there is a beginning—simple, quiet, almost empty.
+
+From that beginning:
+
+Energy begins to move.
+Patterns begin to repeat.
+Structures begin to persist.
+
+What emerges may resemble life.
+Or it may not.
+
+The player is not a ruler, but a presence—between observer and catalyst.
+
+Over time, the world may:
+- Organize
+- Collapse
+- Develop intelligence
+- Drift without meaning
+
+The story is emergence itself.
+
+Not what is designed, but what becomes inevitable.
+
+
+4. Design Pillars
+
+- Everything is derived
+- Everything interacts
+- Everything persists
+- Everything evolves
+
+
+5. Future Hooks
+
+- Emergent symbolic communication
+- Agent goal formation
+- Environmental memory
+- Cross-simulation continuity
+
+
+6. Suggested File Placement
+
+/docs/vision/ex_origine_project_statement_v0.1.txt
+
+
+Patch Log
+
+v0.1
+- Initial definition of project statement, goals, and narrative vision

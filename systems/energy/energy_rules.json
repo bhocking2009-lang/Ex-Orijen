@@ -1,0 +1,8 @@
+{
+  "version": "0.1",
+  "description": "Energy system rules — loaded at runtime, no hardcoded values.",
+  "decay_rate": 0.001,
+  "flow_coefficient": 0.5,
+  "min_energy_threshold": 0.0,
+  "conservation_enforced": true
+}

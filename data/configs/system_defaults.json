@@ -1,0 +1,11 @@
+{
+  "version": "0.1",
+  "description": "Default per-system runtime values — all rules must be data-driven.",
+  "energy_decay_rate": 0.001,
+  "energy_flow_coefficient": 0.5,
+  "energy_conservation_enforced": true,
+  "entity_action_cost": 0.01,
+  "entity_energy_threshold": 0.1,
+  "environment_diffusion_rate": 0.05,
+  "information_memory_depth": 100
+}
