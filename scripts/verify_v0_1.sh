@@ -51,6 +51,12 @@ core/simulation/simulation_controller.cpp
 $COMMON_SOURCES
 "
 
+OBSERVER_TEST_SOURCES="
+tests/integration/v0_6_observer_integration_test.cpp
+core/simulation/simulation_controller.cpp
+$COMMON_SOURCES
+"
+
 SMOKE_SOURCES="
 tests/smoke_tests.cpp
 core/tick_system/tick_manager.cpp
@@ -84,6 +90,10 @@ $CXX $STD -I. $UNIT_SOURCES -o "$OUT_DIR/core_unit_tests"
 echo "[verify] Building and running MVB integration test"
 $CXX $STD -I. $MVB_TEST_SOURCES -o "$OUT_DIR/mvb_integration_test"
 "$OUT_DIR/mvb_integration_test"
+
+echo "[verify] Building and running v0.6 observer integration test"
+$CXX $STD -I. $OBSERVER_TEST_SOURCES -o "$OUT_DIR/v0_6_observer_integration_test"
+"$OUT_DIR/v0_6_observer_integration_test"
 
 echo "[verify] Building and running legacy smoke tests"
 $CXX $STD -I. $SMOKE_SOURCES -o "$OUT_DIR/smoke_tests"
