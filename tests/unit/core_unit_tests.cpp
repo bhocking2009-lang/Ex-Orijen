@@ -1,31 +1,7 @@
-// Ex Origine — Core Unit Tests (v0.1)
-// Covers: EventBus, SimulationLogger, SimulationState, StateManager,
-//         ConfigLoader, SystemRegistry, TickScheduler,
-//         EnergyPool, EnergySystem, StateMemory, InformationSystem,
-//         BehaviorModel, EntitySystem, WorldGrid, InteractionSystem.
-//
-// Build (from repo root):
-//   g++ -std=c++17 \
-//       tests/unit/core_unit_tests.cpp \
-//       core/events/event_bus.cpp \
-//       core/logging/simulation_logger.cpp \
-//       core/state/simulation_state.cpp \
-//       core/state/state_manager.cpp \
-//       core/config/config_loader.cpp \
-//       core/registry/system_registry.cpp \
-//       core/tick/tick_scheduler.cpp \
-//       systems/energy/energy_pool.cpp \
-//       systems/energy/energy_system.cpp \
-//       systems/information/state_memory.cpp \
-//       systems/information/information_system.cpp \
-//       systems/entity/entity.cpp \
-//       systems/entity/behavior_model.cpp \
-//       systems/entity/entity_system.cpp \
-//       systems/environment/world_grid.cpp \
-//       systems/environment/environment_system.cpp \
-//       systems/interaction/interaction_event.cpp \
-//       systems/interaction/interaction_system.cpp \
-//       -o /tmp/core_unit_tests && /tmp/core_unit_tests
+// Ex Origine - Core Unit Tests (v0.1)
+// Covers: EventBus, SimulationState, StateManager, ConfigLoader,
+// SystemRegistry, TickScheduler, EnergyPool, EnergySystem, StateMemory,
+// InformationSystem, BehaviorModel, EntitySystem, WorldGrid, InteractionSystem.
 
 #include <cassert>
 #include <iostream>
@@ -62,7 +38,6 @@ static int failed = 0;
         else      { ++failed; std::cout << "[FAIL] " name "\n"; } \
     } while (false)
 
-// ── EventBus ─────────────────────────────────────────────────────────────────
 void test_event_bus() {
     EventBus bus;
     int count = 0;
@@ -73,7 +48,6 @@ void test_event_bus() {
     TEST("EventBus: unsubscribed event is ignored", count == 3);
 }
 
-// ── SimulationState ───────────────────────────────────────────────────────────
 void test_simulation_state() {
     SimulationState s;
     s.tick = 5;
@@ -85,7 +59,6 @@ void test_simulation_state() {
     TEST("SimulationState: stored value correct", val == 42);
 }
 
-// ── StateManager ──────────────────────────────────────────────────────────────
 void test_state_manager() {
     StateManager sm;
     TEST("StateManager: history empty on creation", sm.historySize() == 0);
@@ -99,10 +72,8 @@ void test_state_manager() {
     TEST("StateManager: history has two entries", sm.historySize() == 2);
 }
 
-// ── ConfigLoader ──────────────────────────────────────────────────────────────
 void test_config_loader() {
-    // Write a temporary config file.
-    const std::string tmpPath = "/tmp/ex_origine_test_config.json";
+    const std::string tmpPath = "ex_origine_test_config.json";
     {
         std::ofstream f(tmpPath);
         f << "{\n"
@@ -111,6 +82,7 @@ void test_config_loader() {
           << "  \"label\": \"test\"\n"
           << "}\n";
     }
+
     ConfigLoader cl;
     TEST("ConfigLoader: load returns true for valid file", cl.load(tmpPath));
     TEST("ConfigLoader: has() returns true for present key", cl.has("tick_rate_hz"));
@@ -122,10 +94,9 @@ void test_config_loader() {
     TEST("ConfigLoader: default returned for missing key",
          cl.getString("missing_key", "default") == "default");
     TEST("ConfigLoader: load returns false for missing file",
-         !cl.load("/tmp/no_such_file.json"));
+         !cl.load("no_such_file.json"));
 }
 
-// ── SystemRegistry ────────────────────────────────────────────────────────────
 struct DummySystem : public ISystem {
     bool inited = false;
     void init()     override { inited = true; }
@@ -140,15 +111,14 @@ void test_system_registry() {
     TEST("SystemRegistry: hasSystem after register", reg.hasSystem("dummy"));
     TEST("SystemRegistry: getSystem returns correct ptr", reg.getSystem("dummy") == ds);
     TEST("SystemRegistry: orderedSystems has one entry", reg.orderedSystems().size() == 1);
-    reg.registerSystem("dummy", ds);  // re-registration is a no-op
+    reg.registerSystem("dummy", ds);
     TEST("SystemRegistry: duplicate registration ignored", reg.orderedSystems().size() == 1);
     reg.deregisterSystem("dummy");
     TEST("SystemRegistry: hasSystem false after deregister", !reg.hasSystem("dummy"));
 }
 
-// ── TickScheduler ─────────────────────────────────────────────────────────────
 void test_tick_scheduler() {
-    TickScheduler ts(1000.0);  // high rate so 5 ticks complete near-instantly
+    TickScheduler ts(1000.0);
     int ticks = 0;
     ts.addTickCallback([&](uint64_t) { ++ticks; });
     TEST("TickScheduler: tick count starts at 0", ts.tickCount() == 0);
@@ -157,7 +127,6 @@ void test_tick_scheduler() {
     TEST("TickScheduler: tickCount reports 5", ts.tickCount() == 5);
 }
 
-// ── EnergyPool ────────────────────────────────────────────────────────────────
 void test_energy_pool() {
     EnergyPool pool(1, 100.0, 50.0);
     TEST("EnergyPool: initial level correct", pool.level() == 50.0);
@@ -172,7 +141,6 @@ void test_energy_pool() {
     TEST("EnergyPool: deposit capped at capacity", pool.deposit(9999.0) && pool.level() == 100.0);
 }
 
-// ── EnergySystem ──────────────────────────────────────────────────────────────
 void test_energy_system() {
     EventBus bus;
     bool transferFired = false;
@@ -192,19 +160,16 @@ void test_energy_system() {
     TEST("EnergySystem: total energy zero after shutdown", es.totalEnergy() == 0.0);
 }
 
-// ── StateMemory ───────────────────────────────────────────────────────────────
 void test_state_memory() {
     StateMemory mem(5);
     TEST("StateMemory: empty on creation", mem.entryCount() == 0);
     mem.record(1, "a", 10);
     TEST("StateMemory: has key after record", mem.has("a"));
     TEST("StateMemory: latest value correct", std::any_cast<int>(mem.latest("a")) == 10);
-    // Fill past capacity to test eviction.
     for (int i = 0; i < 5; ++i) mem.record(i + 2, "x", i);
     TEST("StateMemory: history bounded to maxHistory", mem.entryCount() <= 5);
 }
 
-// ── InformationSystem ─────────────────────────────────────────────────────────
 void test_information_system() {
     EventBus bus;
     InformationSystem info(bus);
@@ -216,7 +181,6 @@ void test_information_system() {
     info.shutdown();
 }
 
-// ── BehaviorModel ─────────────────────────────────────────────────────────────
 void test_behavior_model() {
     BehaviorModel bm;
     Entity alive{1, 10.0, EntityState::Idle, "test"};
@@ -233,7 +197,6 @@ void test_behavior_model() {
     TEST("BehaviorModel: entity below threshold does not act", !res3.acted);
 }
 
-// ── EntitySystem ──────────────────────────────────────────────────────────────
 void test_entity_system() {
     EventBus bus;
     EnergySystem es(bus, 0.0);
@@ -255,7 +218,6 @@ void test_entity_system() {
     es.shutdown();
 }
 
-// ── WorldGrid ─────────────────────────────────────────────────────────────────
 void test_world_grid() {
     WorldGrid grid(5, 5);
     TEST("WorldGrid: width correct", grid.width() == 5);
@@ -268,7 +230,6 @@ void test_world_grid() {
          grid.at(0, 0).resource < before && grid.at(1, 0).resource > 0.0f);
 }
 
-// ── InteractionSystem ─────────────────────────────────────────────────────────
 void test_interaction_system() {
     EventBus bus;
     bool resolved = false;
@@ -285,7 +246,6 @@ void test_interaction_system() {
     TEST("InteractionSystem: log cleared on shutdown", inter.resolvedLog().empty());
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
 int main() {
     test_event_bus();
     test_simulation_state();
