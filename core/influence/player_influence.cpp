@@ -1,5 +1,6 @@
 #include "player_influence.h"
 #include <algorithm>
+#include <cctype>
 
 namespace {
 std::string lower(std::string value) {
