@@ -11,21 +11,36 @@ Application::Application()
 
 bool Application::init(int argc, char* argv[]) {
     configPath_ = "data/configs/simulation_config.json";
+    bool ticksProvidedViaCli = false;
 
     for (int i = 1; i < argc; ++i) {
         std::string arg(argv[i]);
         if (arg == "--config" && i + 1 < argc) {
             configPath_ = argv[++i];
         } else if (arg == "--ticks" && i + 1 < argc) {
-            try { maxTicks_ = std::stoull(argv[++i]); } catch (...) {}
+            try {
+                maxTicks_ = std::stoull(argv[++i]);
+                ticksProvidedViaCli = true;
+            } catch (...) {
+                std::cerr << "[App] Invalid --ticks value; using default.\n";
+            }
         }
     }
 
-    controller_.loadConfig(configPath_);
+    if (!controller_.loadConfig(configPath_)) {
+        std::cerr << "[App] Failed to load config: " << configPath_ << "\n";
+        return false;
+    }
 
-    // Override maxTicks from config if not set via CLI.
-    auto configTicks = controller_.config().getInt("max_ticks", static_cast<int64_t>(maxTicks_));
-    maxTicks_ = static_cast<uint64_t>(configTicks);
+    // Override maxTicks from config only when the CLI did not explicitly set it.
+    if (!ticksProvidedViaCli) {
+        auto configTicks = controller_.config().getInt("max_ticks", static_cast<int64_t>(maxTicks_));
+        if (configTicks > 0) {
+            maxTicks_ = static_cast<uint64_t>(configTicks);
+        } else {
+            std::cerr << "[App] Ignoring non-positive max_ticks in config; using default.\n";
+        }
+    }
 
     auto& bus = controller_.eventBus();
     const auto& cfg = controller_.config();
@@ -55,7 +70,7 @@ bool Application::init(int argc, char* argv[]) {
     uint64_t poolId = energySys_->createPool(initialEnergy, initialEnergy);
     entitySys_->spawnEntity(initialEnergy * 0.1, poolId, "pioneer");
 
-    controller_.logger().log("App", "Simulation initialised — MVB ready.");
+    controller_.logger().log("App", "Simulation initialised - MVB ready.");
     return true;
 }
 
@@ -65,5 +80,5 @@ void Application::run() {
 
 void Application::shutdown() {
     controller_.shutdown();
-    controller_.logger().log("App", "Simulation complete — clean exit.");
+    controller_.logger().log("App", "Simulation complete - clean exit.");
 }
