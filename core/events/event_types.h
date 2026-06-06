@@ -1,6 +1,6 @@
 #pragma once
 
-// EventTypes — defines all simulation event categories and the SimEvent payload.
+// EventTypes - defines all simulation event categories and the SimEvent payload.
 // OMA Alignment: A3 (Simulation Control) / A2 (Core Systems)
 
 #include <string>
@@ -15,6 +15,8 @@ enum class EventType : uint8_t {
     StateCommitted,
     TickBegin,
     TickEnd,
+    PlayerInfluenceApplied,
+    WorldSnapshotCaptured,
 };
 
 struct SimEvent {

@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
 
-$outDir = if ($env:OUT_DIR) { $env:OUT_DIR } else { 'build/v0_1_verify' }
+$outDir = if ($env:OUT_DIR) { $env:OUT_DIR } else { 'build/v0_6_verify' }
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
 $commonSources = @(
@@ -11,6 +11,8 @@ $commonSources = @(
     'core/config/config_loader.cpp',
     'core/registry/system_registry.cpp',
     'core/tick/tick_scheduler.cpp',
+    'core/replay/replay_system.cpp',
+    'core/influence/player_influence.cpp',
     'systems/energy/energy_pool.cpp',
     'systems/energy/energy_system.cpp',
     'systems/information/state_memory.cpp',
@@ -21,7 +23,10 @@ $commonSources = @(
     'systems/environment/world_grid.cpp',
     'systems/environment/environment_system.cpp',
     'systems/interaction/interaction_event.cpp',
-    'systems/interaction/interaction_system.cpp'
+    'systems/interaction/interaction_system.cpp',
+    'interface/visualization/world_snapshot.cpp',
+    'interface/visualization/terminal_observer.cpp',
+    'interface/visualization/world_observer.cpp'
 )
 
 $appSources = @(
@@ -34,6 +39,11 @@ $unitSources = @('tests/unit/core_unit_tests.cpp') + $commonSources
 
 $mvbTestSources = @(
     'tests/integration/mvb_integration_test.cpp',
+    'core/simulation/simulation_controller.cpp'
+) + $commonSources
+
+$observerTestSources = @(
+    'tests/integration/v0_6_observer_integration_test.cpp',
     'core/simulation/simulation_controller.cpp'
 ) + $commonSources
 
@@ -105,11 +115,12 @@ function Invoke-Compile($Name, $Sources, $Output) {
 $appExe = Join-Path $outDir 'ex_origine.exe'
 $unitExe = Join-Path $outDir 'core_unit_tests.exe'
 $mvbExe = Join-Path $outDir 'mvb_integration_test.exe'
+$observerExe = Join-Path $outDir 'v0_6_observer_integration_test.exe'
 $smokeExe = Join-Path $outDir 'smoke_tests.exe'
 
 Invoke-Compile 'Building MVB executable' $appSources $appExe
 Invoke-Step 'Running default 10-tick MVB' { & $appExe '--ticks' '10' }
-Invoke-Step 'Running 100-tick MVB closeout loop' { & $appExe '--ticks' '100' }
+Invoke-Step 'Running 100-tick observable loop' { & $appExe '--ticks' '100' '--mode' 'attract' '--snapshot' 'runtime/replays/verify_world.jsonl' '--replay' 'runtime/replays/verify_events.replay' }
 
 Write-Host '[verify] Checking missing config fails'
 & $appExe '--config' 'data/configs/no_such_config.json' '--ticks' '1'
@@ -123,7 +134,10 @@ Invoke-Step 'Running unit tests' { & $unitExe }
 Invoke-Compile 'Building MVB integration test' $mvbTestSources $mvbExe
 Invoke-Step 'Running MVB integration test' { & $mvbExe }
 
+Invoke-Compile 'Building v0.6 observer integration test' $observerTestSources $observerExe
+Invoke-Step 'Running v0.6 observer integration test' { & $observerExe }
+
 Invoke-Compile 'Building legacy smoke tests' $smokeSources $smokeExe
 Invoke-Step 'Running legacy smoke tests' { & $smokeExe }
 
-Write-Host '[verify] v0.1 closeout checks passed'
+Write-Host '[verify] v0.2-v0.6 closeout checks passed'

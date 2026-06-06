@@ -1,15 +1,8 @@
 #pragma once
 
-// SimulationController (Engineering Schematic v0.1) — integrated runtime owner.
-// Owns config, registry, tick scheduler, state, event bus, and logger.
+// SimulationController (Engineering Schematic v0.4) - integrated runtime owner.
+// Owns config, registry, tick scheduler, state, event bus, logger, and replay.
 // OMA Alignment: A3 (Simulation Control)
-//
-// Usage:
-//   controller.loadConfig("data/configs/simulation_config.json");
-//   controller.registry().registerSystem("energy", energySys);
-//   controller.initSystems();
-//   controller.run(100);
-//   controller.shutdown();
 
 #include "../config/config_loader.h"
 #include "../registry/system_registry.h"
@@ -17,28 +10,25 @@
 #include "../state/state_manager.h"
 #include "../events/event_bus.h"
 #include "../logging/simulation_logger.h"
+#include "../replay/replay_system.h"
 
 class SimulationController {
 public:
     SimulationController();
 
-    // Step 1: load configuration (must be called before initSystems).
     bool loadConfig(const std::string& configPath);
-
-    // Step 2: initialise all registered systems and wire the tick callback.
     bool initSystems();
-
-    // Step 3: run the tick loop.
     void run(uint64_t maxTicks = 0);
 
     void stop();
     void shutdown();
 
-    // Accessors used during setup (before initSystems).
     SystemRegistry&     registry();
     EventBus&           eventBus();
     StateManager&       stateManager();
     SimulationLogger&   logger();
+    ReplaySystem&       replay();
+    const ReplaySystem& replay() const;
     const ConfigLoader& config() const;
 
 private:
@@ -48,6 +38,10 @@ private:
     StateManager     stateManager_;
     EventBus         eventBus_;
     SimulationLogger logger_;
+    ReplaySystem     replay_;
+    uint64_t         currentTick_;
+    bool             replayWired_;
 
+    void wireReplay();
     void onTick(uint64_t tick);
 };
