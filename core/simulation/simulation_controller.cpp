@@ -7,7 +7,12 @@ bool SimulationController::loadConfig(const std::string& configPath) {
     if (!configPath.empty() && !config_.load(configPath)) {
         return false;
     }
+
     double hz = config_.getDouble("tick_rate_hz", 20.0);
+    if (hz <= 0.0) {
+        logger_.log("Config", "Ignoring non-positive tick_rate_hz; using 20 Hz default.");
+        hz = 20.0;
+    }
     tickScheduler_.setTickRate(hz);
     return true;
 }
