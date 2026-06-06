@@ -10,9 +10,57 @@ It is not simply a game - it is a system where physics, information, and decisio
 
 ## Project Status
 
-`v0.1 - Architectural skeleton established; closeout verification defined`
+`v0.6 - Observable simulation loop established`
 
-The v0.1 loop is considered closed when the repository can build, run, test, and explain a 100-tick MVB simulation from data files alone. See `docs/release/v0.1_closeout_checklist.md`.
+v0.1 closed the core runtime loop. v0.2 through v0.6 add the first visible world layer: tick-end world snapshots, contextual entity behavior, replay inspection, player influence modes, and a terminal observer grid.
+
+---
+
+## What Exists Now
+
+- **v0.2 Observable snapshots**: `WorldObserver` captures one `WorldSnapshot` per tick and writes JSON-lines output.
+- **v0.3 Entity behavior**: entities sense local grid resources, seek richer neighboring cells, harvest resources, observe patterns, and retain a simple memory signal.
+- **v0.4 Replay inspection**: `ReplaySystem` records runtime events, reloads saved replay files, summarizes event counts, and inspects individual ticks.
+- **v0.5 Player influence**: observer, energize, dampen, attract, stabilize, and architect modes nudge the environment through explicit events.
+- **v0.6 Terminal observer**: `--observe` renders a simple resource grid with entity overlays as the simulation runs.
+
+---
+
+## Quick Start
+
+Requires a C++17-compatible compiler. On Windows, the PowerShell verifier uses `g++` when available and otherwise falls back to Visual Studio `cl.exe` through `VsDevCmd.bat`.
+
+Linux/macOS/Git Bash:
+
+```sh
+./scripts/verify_v0_6.sh
+```
+
+Windows PowerShell:
+
+```powershell
+.\scripts\verify_v0_6.ps1
+```
+
+Run the app directly after building through the verifier:
+
+```powershell
+.\build\v0_6_verify\ex_origine.exe --ticks 100 --mode attract --observe
+```
+
+Useful flags:
+
+- `--ticks <n>`: number of ticks to run.
+- `--mode <observer|energize|dampen|attract|stabilize|architect>`: player influence mode.
+- `--observe`: print the terminal observer grid each tick.
+- `--snapshot <path>`: write JSON-lines world snapshots.
+- `--replay <path>`: write replay event records.
+- `--config <path>`: use an alternate config file.
+
+Default outputs:
+
+- `runtime/replays/latest_world.jsonl`
+- `runtime/replays/latest_events.replay`
 
 ---
 
@@ -20,55 +68,51 @@ The v0.1 loop is considered closed when the repository can build, run, test, and
 
 ```
 docs/
-  vision/          - Project vision & narrative
+  vision/          - Project vision and narrative
   architecture/    - Wireframes and structural specs
   systems/         - Per-system design documents
   engineering/     - Engineering implementation schematics
   release/         - Version closeout checklists and release gates
 
 core/
-  app/             - Application entry (main.cpp + Application class)
-  config/          - ConfigLoader (zero-dependency JSON reader)
-  simulation/      - Integrated SimulationController (Engineering v0.1)
-  tick/            - TickScheduler (fixed-timestep, chrono-based)
-  registry/        - SystemRegistry (ordered, enable/disable)
-  state/           - SimulationState + StateManager
-  events/          - EventBus + EventTypes
+  app/             - Application entry and CLI wiring
+  config/          - ConfigLoader
+  events/          - EventBus and event types
+  influence/       - Player influence modes
   logging/         - SimulationLogger
-  replay/          - ReplaySystem (event recording + save)
-  simulation_controller/  - v0.1 skeleton SimulationController (preserved)
-  tick_system/            - v0.1 skeleton TickManager (preserved)
+  registry/        - SystemRegistry
+  replay/          - ReplaySystem and replay inspection
+  simulation/      - Integrated SimulationController
+  state/           - SimulationState and StateManager
+  tick/            - TickScheduler
 
 systems/
-  energy/          - EnergyPool + EnergySystem (+ legacy energy_core)
-  information/     - StateMemory + InformationSystem (+ legacy info_core)
-  entity/          - Entity + BehaviorModel + EntitySystem (+ legacy entity_core)
-  environment/     - WorldGrid + EnvironmentSystem (+ legacy environment_core)
-  interaction/     - InteractionEvent + InteractionSystem (+ legacy interaction_core)
+  energy/          - EnergyPool and EnergySystem
+  information/     - StateMemory and InformationSystem
+  entity/          - Entity, BehaviorModel, EntitySystem
+  environment/     - WorldGrid and EnvironmentSystem
+  interaction/     - InteractionEvent and InteractionSystem
+
+interface/
+  visualization/   - WorldSnapshot, WorldObserver, TerminalObserver
+  controls/        - Future player input handling
 
 data/
   configs/         - simulation_config.json, system_defaults.json
-  schemas/         - JSON schemas for all data files
-  rules/           - (future) data-driven rule files
+  schemas/         - JSON schemas for data files
+  rules/           - Future data-driven rule files
   seeds/           - Initial world conditions
 
 runtime/
-  logs/            - Simulation event logs
-  saves/           - Serialised simulation snapshots
-  replays/         - Deterministic replay recordings
-
-interface/
-  visualization/   - Output / rendering layer
-  controls/        - Player input handling
-
-scripts/
-  verify_v0_1.sh   - POSIX v0.1 closeout verification
-  verify_v0_1.ps1  - PowerShell v0.1 closeout verification
+  logs/            - Simulation logs
+  saves/           - Serialized simulation snapshots
+  replays/         - Replay and world snapshot outputs
 
 tests/
-  smoke_tests.cpp          - v0.1 skeleton smoke tests (21 assertions)
-  unit/core_unit_tests.cpp - Engineering v0.1 unit tests (64 assertions)
-  integration/mvb_integration_test.cpp - Full MVB integration test (8 assertions)
+  smoke_tests.cpp
+  unit/core_unit_tests.cpp
+  integration/mvb_integration_test.cpp
+  integration/v0_6_observer_integration_test.cpp
 ```
 
 ---
@@ -76,113 +120,9 @@ tests/
 ## Design Pillars
 
 - **Everything is derived** - no arbitrary constants; all values emerge from rules.
-- **Everything interacts** - every system affects every other through defined interfaces.
-- **Everything persists** - all state changes are logged and replayable.
+- **Everything interacts** - systems communicate through defined interfaces and events.
+- **Everything persists** - state changes are logged, replayed, or snapshotted.
 - **Everything evolves** - systems are versioned and replaceable without rewrites.
-
----
-
-## Documentation
-
-| Document | Path |
-|---|---|
-| Project Vision (v0.1) | `docs/vision/ex_origine_project_statement_v0.1.txt` |
-| Architecture Wireframe (v0.1) | `docs/architecture/project_wireframe_v0.1.txt` |
-| Program Engineer Schematic (v0.1) | `docs/engineering/program_engineer_schematic_v0.1.txt` |
-| v0.1 Closeout Checklist | `docs/release/v0.1_closeout_checklist.md` |
-
----
-
-## Building & Running
-
-Requires a C++17-compatible compiler. All commands run from the repo root.
-
-### v0.1 Closeout Verification
-
-Linux/macOS/Git Bash:
-
-```sh
-./scripts/verify_v0_1.sh
-```
-
-Windows PowerShell:
-
-```powershell
-.\scripts\verify_v0_1.ps1
-```
-
-The scripts build and run the MVB executable, 10-tick and 100-tick runs, missing-config failure check, unit tests, MVB integration test, and legacy smoke tests.
-
-### MVB Executable (Engineering Schematic v0.1)
-
-```sh
-g++ -std=c++17 -I. \
-    core/app/main.cpp core/app/application.cpp \
-    core/events/event_bus.cpp \
-    core/logging/simulation_logger.cpp \
-    core/state/simulation_state.cpp core/state/state_manager.cpp \
-    core/config/config_loader.cpp \
-    core/registry/system_registry.cpp \
-    core/tick/tick_scheduler.cpp \
-    core/simulation/simulation_controller.cpp \
-    systems/energy/energy_pool.cpp systems/energy/energy_system.cpp \
-    systems/information/state_memory.cpp systems/information/information_system.cpp \
-    systems/entity/entity.cpp systems/entity/behavior_model.cpp systems/entity/entity_system.cpp \
-    systems/environment/world_grid.cpp systems/environment/environment_system.cpp \
-    systems/interaction/interaction_event.cpp systems/interaction/interaction_system.cpp \
-    -o ex_origine && ./ex_origine
-```
-
-Optional flags: `--config <path>` `--ticks <n>`
-
-### Unit Tests (64 assertions)
-
-```sh
-g++ -std=c++17 -I. \
-    tests/unit/core_unit_tests.cpp \
-    core/events/event_bus.cpp core/logging/simulation_logger.cpp \
-    core/state/simulation_state.cpp core/state/state_manager.cpp \
-    core/config/config_loader.cpp core/registry/system_registry.cpp \
-    core/tick/tick_scheduler.cpp \
-    systems/energy/energy_pool.cpp systems/energy/energy_system.cpp \
-    systems/information/state_memory.cpp systems/information/information_system.cpp \
-    systems/entity/entity.cpp systems/entity/behavior_model.cpp systems/entity/entity_system.cpp \
-    systems/environment/world_grid.cpp systems/environment/environment_system.cpp \
-    systems/interaction/interaction_event.cpp systems/interaction/interaction_system.cpp \
-    -o unit_tests && ./unit_tests
-```
-
-### MVB Integration Test (8 assertions)
-
-```sh
-g++ -std=c++17 -I. \
-    tests/integration/mvb_integration_test.cpp \
-    core/events/event_bus.cpp core/logging/simulation_logger.cpp \
-    core/state/simulation_state.cpp core/state/state_manager.cpp \
-    core/config/config_loader.cpp core/registry/system_registry.cpp \
-    core/tick/tick_scheduler.cpp core/simulation/simulation_controller.cpp \
-    systems/energy/energy_pool.cpp systems/energy/energy_system.cpp \
-    systems/information/state_memory.cpp systems/information/information_system.cpp \
-    systems/entity/entity.cpp systems/entity/behavior_model.cpp systems/entity/entity_system.cpp \
-    systems/environment/world_grid.cpp systems/environment/environment_system.cpp \
-    systems/interaction/interaction_event.cpp systems/interaction/interaction_system.cpp \
-    -o mvb_test && ./mvb_test
-```
-
-### v0.1 Skeleton Smoke Tests (21 assertions)
-
-```sh
-g++ -std=c++17 \
-    tests/smoke_tests.cpp \
-    core/tick_system/tick_manager.cpp \
-    systems/energy/energy_core.cpp \
-    systems/energy/energy_flow_solver.cpp \
-    systems/information/information_core.cpp \
-    systems/entity/entity_core.cpp \
-    systems/environment/environment_core.cpp \
-    systems/interaction/interaction_core.cpp \
-    -o smoke_tests && ./smoke_tests
-```
 
 ---
 
@@ -191,7 +131,7 @@ g++ -std=c++17 \
 | Layer | Responsibility |
 |---|---|
 | A1 | Foundational intent (vision documents) |
-| A2 | Core systems: Energy, Information, Entity |
-| A3 | Simulation control: Tick Manager, Scheduler |
+| A2 | Core systems: Energy, Information, Entity, Environment |
+| A3 | Simulation control: Scheduler, events, replay |
 | A4 | Player interface: Observer / Influencer / Architect |
-| A5 | Data layer: Persistence, Logging, Replay, Versioning |
+| A5 | Data layer: Config, snapshots, replay, saves |
