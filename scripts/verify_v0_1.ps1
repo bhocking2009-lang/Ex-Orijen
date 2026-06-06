@@ -42,6 +42,11 @@ $mvbTestSources = @(
     'core/simulation/simulation_controller.cpp'
 ) + $commonSources
 
+$observerTestSources = @(
+    'tests/integration/v0_6_observer_integration_test.cpp',
+    'core/simulation/simulation_controller.cpp'
+) + $commonSources
+
 $smokeSources = @(
     'tests/smoke_tests.cpp',
     'core/tick_system/tick_manager.cpp',
@@ -110,6 +115,7 @@ function Invoke-Compile($Name, $Sources, $Output) {
 $appExe = Join-Path $outDir 'ex_origine.exe'
 $unitExe = Join-Path $outDir 'core_unit_tests.exe'
 $mvbExe = Join-Path $outDir 'mvb_integration_test.exe'
+$observerExe = Join-Path $outDir 'v0_6_observer_integration_test.exe'
 $smokeExe = Join-Path $outDir 'smoke_tests.exe'
 
 Invoke-Compile 'Building MVB executable' $appSources $appExe
@@ -127,6 +133,9 @@ Invoke-Step 'Running unit tests' { & $unitExe }
 
 Invoke-Compile 'Building MVB integration test' $mvbTestSources $mvbExe
 Invoke-Step 'Running MVB integration test' { & $mvbExe }
+
+Invoke-Compile 'Building v0.6 observer integration test' $observerTestSources $observerExe
+Invoke-Step 'Running v0.6 observer integration test' { & $observerExe }
 
 Invoke-Compile 'Building legacy smoke tests' $smokeSources $smokeExe
 Invoke-Step 'Running legacy smoke tests' { & $smokeExe }
