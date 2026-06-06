@@ -3,7 +3,7 @@ set -eu
 
 CXX=${CXX:-g++}
 STD=${STD:--std=c++17}
-OUT_DIR=${OUT_DIR:-build/v0_1_verify}
+OUT_DIR=${OUT_DIR:-build/v0_6_verify}
 
 mkdir -p "$OUT_DIR"
 
@@ -15,6 +15,8 @@ core/state/state_manager.cpp
 core/config/config_loader.cpp
 core/registry/system_registry.cpp
 core/tick/tick_scheduler.cpp
+core/replay/replay_system.cpp
+core/influence/player_influence.cpp
 systems/energy/energy_pool.cpp
 systems/energy/energy_system.cpp
 systems/information/state_memory.cpp
@@ -26,6 +28,9 @@ systems/environment/world_grid.cpp
 systems/environment/environment_system.cpp
 systems/interaction/interaction_event.cpp
 systems/interaction/interaction_system.cpp
+interface/visualization/world_snapshot.cpp
+interface/visualization/terminal_observer.cpp
+interface/visualization/world_observer.cpp
 "
 
 APP_SOURCES="
@@ -63,8 +68,8 @@ $CXX $STD -I. $APP_SOURCES -o "$OUT_DIR/ex_origine"
 echo "[verify] Running default 10-tick MVB"
 "$OUT_DIR/ex_origine" --ticks 10
 
-echo "[verify] Running 100-tick MVB closeout loop"
-"$OUT_DIR/ex_origine" --ticks 100
+echo "[verify] Running 100-tick observable loop"
+"$OUT_DIR/ex_origine" --ticks 100 --mode attract --snapshot runtime/replays/verify_world.jsonl --replay runtime/replays/verify_events.replay
 
 echo "[verify] Checking missing config fails"
 if "$OUT_DIR/ex_origine" --config data/configs/no_such_config.json --ticks 1; then
@@ -84,4 +89,4 @@ echo "[verify] Building and running legacy smoke tests"
 $CXX $STD -I. $SMOKE_SOURCES -o "$OUT_DIR/smoke_tests"
 "$OUT_DIR/smoke_tests"
 
-echo "[verify] v0.1 closeout checks passed"
+echo "[verify] v0.2-v0.6 closeout checks passed"
