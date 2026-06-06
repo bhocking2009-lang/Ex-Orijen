@@ -1,9 +1,6 @@
 $ErrorActionPreference = 'Stop'
 
-$cxx = if ($env:CXX) { $env:CXX } else { 'g++' }
-$std = if ($env:STD) { $env:STD } else { '-std=c++17' }
 $outDir = if ($env:OUT_DIR) { $env:OUT_DIR } else { 'build/v0_1_verify' }
-
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
 $commonSources = @(
@@ -59,12 +56,58 @@ function Invoke-Step($Name, [scriptblock]$Body) {
     }
 }
 
+function Find-VsDevCmd {
+    $candidates = @(
+        'C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat',
+        'C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\Tools\VsDevCmd.bat',
+        'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat',
+        'C:\Program Files\Microsoft Visual Studio\2022\BuildTools\Common7\Tools\VsDevCmd.bat'
+    )
+
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath $candidate) { return $candidate }
+    }
+
+    return $null
+}
+
+$explicitCxx = [bool]$env:CXX
+$cxx = if ($env:CXX) { $env:CXX } else { 'g++' }
+$useGcc = [bool](Get-Command $cxx -ErrorAction SilentlyContinue)
+$vsDevCmd = $null
+
+if (-not $useGcc -and -not $explicitCxx) {
+    $vsDevCmd = Find-VsDevCmd
+    if ($vsDevCmd) {
+        Write-Host '[verify] g++ not found; using Visual Studio cl.exe via VsDevCmd.bat'
+    }
+}
+
+if (-not $useGcc -and -not $vsDevCmd) {
+    throw 'No supported C++17 compiler found. Install g++ or Visual Studio C++ Build Tools, or set CXX.'
+}
+
+function Invoke-Compile($Name, $Sources, $Output) {
+    if ($useGcc) {
+        $std = if ($env:STD) { $env:STD } else { '-std=c++17' }
+        Invoke-Step $Name { & $cxx $std '-I.' @Sources '-o' $Output }
+        return
+    }
+
+    $clArgs = @('/nologo', '/std:c++17', '/EHsc', '/I.') + $Sources + @("/Fe:$Output")
+    $quotedArgs = ($clArgs | ForEach-Object {
+        if ($_ -match '[\s&()^]') { '"' + ($_ -replace '"', '\"') + '"' } else { $_ }
+    }) -join ' '
+    $cmd = 'call "' + $vsDevCmd + '" -arch=x64 >nul && cl ' + $quotedArgs
+    Invoke-Step $Name { cmd /c $cmd }
+}
+
 $appExe = Join-Path $outDir 'ex_origine.exe'
 $unitExe = Join-Path $outDir 'core_unit_tests.exe'
 $mvbExe = Join-Path $outDir 'mvb_integration_test.exe'
 $smokeExe = Join-Path $outDir 'smoke_tests.exe'
 
-Invoke-Step 'Building MVB executable' { & $cxx $std '-I.' @appSources '-o' $appExe }
+Invoke-Compile 'Building MVB executable' $appSources $appExe
 Invoke-Step 'Running default 10-tick MVB' { & $appExe '--ticks' '10' }
 Invoke-Step 'Running 100-tick MVB closeout loop' { & $appExe '--ticks' '100' }
 
@@ -74,13 +117,13 @@ if ($LASTEXITCODE -eq 0) {
     throw 'Expected missing config to fail'
 }
 
-Invoke-Step 'Building unit tests' { & $cxx $std '-I.' @unitSources '-o' $unitExe }
+Invoke-Compile 'Building unit tests' $unitSources $unitExe
 Invoke-Step 'Running unit tests' { & $unitExe }
 
-Invoke-Step 'Building MVB integration test' { & $cxx $std '-I.' @mvbTestSources '-o' $mvbExe }
+Invoke-Compile 'Building MVB integration test' $mvbTestSources $mvbExe
 Invoke-Step 'Running MVB integration test' { & $mvbExe }
 
-Invoke-Step 'Building legacy smoke tests' { & $cxx $std '-I.' @smokeSources '-o' $smokeExe }
+Invoke-Compile 'Building legacy smoke tests' $smokeSources $smokeExe
 Invoke-Step 'Running legacy smoke tests' { & $smokeExe }
 
 Write-Host '[verify] v0.1 closeout checks passed'
