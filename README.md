@@ -2,7 +2,7 @@
 
 **Ex Origine** is a modular real-time simulation framework that models the emergence of complexity from first principles.
 
-It is not simply a game — it is a system where physics, information, and decision-making co-evolve, allowing players to guide, observe, or influence the unfolding of structured reality from its most primitive states.
+It is not simply a game - it is a system where physics, information, and decision-making co-evolve, allowing players to guide, observe, or influence the unfolding of structured reality from its most primitive states.
 
 > *"What happens when a world is allowed to become?"*
 
@@ -10,7 +10,9 @@ It is not simply a game — it is a system where physics, information, and decis
 
 ## Project Status
 
-`v0.1 — Architectural skeleton established`
+`v0.1 - Architectural skeleton established; closeout verification defined`
+
+The v0.1 loop is considered closed when the repository can build, run, test, and explain a 100-tick MVB simulation from data files alone. See `docs/release/v0.1_closeout_checklist.md`.
 
 ---
 
@@ -18,60 +20,65 @@ It is not simply a game — it is a system where physics, information, and decis
 
 ```
 docs/
-  vision/          — Project vision & narrative
-  architecture/    — Wireframes and structural specs
-  systems/         — Per-system design documents
-  engineering/     — Engineering implementation schematics
+  vision/          - Project vision & narrative
+  architecture/    - Wireframes and structural specs
+  systems/         - Per-system design documents
+  engineering/     - Engineering implementation schematics
+  release/         - Version closeout checklists and release gates
 
 core/
-  app/             — Application entry (main.cpp + Application class)
-  config/          — ConfigLoader (zero-dependency JSON reader)
-  simulation/      — Integrated SimulationController (Engineering v0.1)
-  tick/            — TickScheduler (fixed-timestep, chrono-based)
-  registry/        — SystemRegistry (ordered, enable/disable)
-  state/           — SimulationState + StateManager
-  events/          — EventBus + EventTypes
-  logging/         — SimulationLogger
-  replay/          — ReplaySystem (event recording + save)
-  simulation_controller/  — v0.1 skeleton SimulationController (preserved)
-  tick_system/            — v0.1 skeleton TickManager (preserved)
+  app/             - Application entry (main.cpp + Application class)
+  config/          - ConfigLoader (zero-dependency JSON reader)
+  simulation/      - Integrated SimulationController (Engineering v0.1)
+  tick/            - TickScheduler (fixed-timestep, chrono-based)
+  registry/        - SystemRegistry (ordered, enable/disable)
+  state/           - SimulationState + StateManager
+  events/          - EventBus + EventTypes
+  logging/         - SimulationLogger
+  replay/          - ReplaySystem (event recording + save)
+  simulation_controller/  - v0.1 skeleton SimulationController (preserved)
+  tick_system/            - v0.1 skeleton TickManager (preserved)
 
 systems/
-  energy/          — EnergyPool + EnergySystem (+ legacy energy_core)
-  information/     — StateMemory + InformationSystem (+ legacy info_core)
-  entity/          — Entity + BehaviorModel + EntitySystem (+ legacy entity_core)
-  environment/     — WorldGrid + EnvironmentSystem (+ legacy environment_core)
-  interaction/     — InteractionEvent + InteractionSystem (+ legacy interaction_core)
+  energy/          - EnergyPool + EnergySystem (+ legacy energy_core)
+  information/     - StateMemory + InformationSystem (+ legacy info_core)
+  entity/          - Entity + BehaviorModel + EntitySystem (+ legacy entity_core)
+  environment/     - WorldGrid + EnvironmentSystem (+ legacy environment_core)
+  interaction/     - InteractionEvent + InteractionSystem (+ legacy interaction_core)
 
 data/
-  configs/         — simulation_config.json, system_defaults.json
-  schemas/         — JSON schemas for all data files
-  rules/           — (future) data-driven rule files
-  seeds/           — Initial world conditions
+  configs/         - simulation_config.json, system_defaults.json
+  schemas/         - JSON schemas for all data files
+  rules/           - (future) data-driven rule files
+  seeds/           - Initial world conditions
 
 runtime/
-  logs/            — Simulation event logs
-  saves/           — Serialised simulation snapshots
-  replays/         — Deterministic replay recordings
+  logs/            - Simulation event logs
+  saves/           - Serialised simulation snapshots
+  replays/         - Deterministic replay recordings
 
 interface/
-  visualization/   — Output / rendering layer
-  controls/        — Player input handling
+  visualization/   - Output / rendering layer
+  controls/        - Player input handling
+
+scripts/
+  verify_v0_1.sh   - POSIX v0.1 closeout verification
+  verify_v0_1.ps1  - PowerShell v0.1 closeout verification
 
 tests/
-  smoke_tests.cpp          — v0.1 skeleton smoke tests (21 assertions)
-  unit/core_unit_tests.cpp — Engineering v0.1 unit tests (64 assertions)
-  integration/mvb_integration_test.cpp — Full MVB integration test (8 assertions)
+  smoke_tests.cpp          - v0.1 skeleton smoke tests (21 assertions)
+  unit/core_unit_tests.cpp - Engineering v0.1 unit tests (64 assertions)
+  integration/mvb_integration_test.cpp - Full MVB integration test (8 assertions)
 ```
 
 ---
 
 ## Design Pillars
 
-- **Everything is derived** — no arbitrary constants; all values emerge from rules.
-- **Everything interacts** — every system affects every other through defined interfaces.
-- **Everything persists** — all state changes are logged and replayable.
-- **Everything evolves** — systems are versioned and replaceable without rewrites.
+- **Everything is derived** - no arbitrary constants; all values emerge from rules.
+- **Everything interacts** - every system affects every other through defined interfaces.
+- **Everything persists** - all state changes are logged and replayable.
+- **Everything evolves** - systems are versioned and replaceable without rewrites.
 
 ---
 
@@ -82,12 +89,29 @@ tests/
 | Project Vision (v0.1) | `docs/vision/ex_origine_project_statement_v0.1.txt` |
 | Architecture Wireframe (v0.1) | `docs/architecture/project_wireframe_v0.1.txt` |
 | Program Engineer Schematic (v0.1) | `docs/engineering/program_engineer_schematic_v0.1.txt` |
+| v0.1 Closeout Checklist | `docs/release/v0.1_closeout_checklist.md` |
 
 ---
 
 ## Building & Running
 
 Requires a C++17-compatible compiler. All commands run from the repo root.
+
+### v0.1 Closeout Verification
+
+Linux/macOS/Git Bash:
+
+```sh
+./scripts/verify_v0_1.sh
+```
+
+Windows PowerShell:
+
+```powershell
+.\scripts\verify_v0_1.ps1
+```
+
+The scripts build and run the MVB executable, 10-tick and 100-tick runs, missing-config failure check, unit tests, MVB integration test, and legacy smoke tests.
 
 ### MVB Executable (Engineering Schematic v0.1)
 
