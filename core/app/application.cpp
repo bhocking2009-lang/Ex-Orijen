@@ -9,9 +9,12 @@
 Application::Application()
     : snapshotPath_("runtime/replays/latest_world.jsonl"),
       replayPath_("runtime/replays/latest_events.replay"),
+      settlementName_("First Hearth"),
       maxTicks_(10),
+      initialPopulation_(120.0),
       terminalObserverEnabled_(false),
-      influenceMode_(PlayerInfluenceMode::Observer) {}
+      influenceMode_(PlayerInfluenceMode::Observer),
+      civicDecision_(CivicDecision::Stewardship) {}
 
 bool Application::init(int argc, char* argv[]) {
     configPath_ = "data/configs/simulation_config.json";
@@ -20,6 +23,9 @@ bool Application::init(int argc, char* argv[]) {
     bool replayProvidedViaCli = false;
     bool observeProvidedViaCli = false;
     bool modeProvidedViaCli = false;
+    bool decisionProvidedViaCli = false;
+    bool settlementProvidedViaCli = false;
+    bool populationProvidedViaCli = false;
 
     for (int i = 1; i < argc; ++i) {
         std::string arg(argv[i]);
@@ -44,6 +50,19 @@ bool Application::init(int argc, char* argv[]) {
         } else if ((arg == "--mode" || arg == "--influence") && i + 1 < argc) {
             influenceMode_ = parsePlayerInfluenceMode(argv[++i]);
             modeProvidedViaCli = true;
+        } else if ((arg == "--decision" || arg == "--civic") && i + 1 < argc) {
+            civicDecision_ = CivilizationSystem::parseDecision(argv[++i]);
+            decisionProvidedViaCli = true;
+        } else if (arg == "--settlement" && i + 1 < argc) {
+            settlementName_ = argv[++i];
+            settlementProvidedViaCli = true;
+        } else if (arg == "--population" && i + 1 < argc) {
+            try {
+                initialPopulation_ = std::stod(argv[++i]);
+                populationProvidedViaCli = true;
+            } catch (...) {
+                std::cerr << "[App] Invalid --population value; using default.\n";
+            }
         }
     }
 
@@ -75,6 +94,19 @@ bool Application::init(int argc, char* argv[]) {
     if (!modeProvidedViaCli) {
         influenceMode_ = parsePlayerInfluenceMode(cfg.getString("player_mode", "observer"));
     }
+    if (!decisionProvidedViaCli) {
+        civicDecision_ = CivilizationSystem::parseDecision(cfg.getString("civic_decision", "stewardship"));
+    }
+    if (!settlementProvidedViaCli) {
+        settlementName_ = cfg.getString("settlement_name", settlementName_);
+    }
+    if (!populationProvidedViaCli) {
+        initialPopulation_ = cfg.getDouble("initial_population", initialPopulation_);
+    }
+    if (initialPopulation_ < 1.0) {
+        std::cerr << "[App] Ignoring non-positive initial_population; using 1.\n";
+        initialPopulation_ = 1.0;
+    }
 
     auto& bus = controller_.eventBus();
 
@@ -85,23 +117,30 @@ bool Application::init(int argc, char* argv[]) {
                         bus,
                         static_cast<std::size_t>(cfg.getInt("grid_width",  10)),
                         static_cast<std::size_t>(cfg.getInt("grid_height", 10)));
-    interactionSys_ = std::make_shared<InteractionSystem>(bus);
+    civilizationSys_ = std::make_shared<CivilizationSystem>(bus, *envSys_);
+    interactionSys_  = std::make_shared<InteractionSystem>(bus);
 
     envSys_->setInfluenceMode(influenceMode_);
     entitySys_->attachEnvironment(*envSys_);
     entitySys_->setInfluenceMode(influenceMode_);
+    civilizationSys_->setDecision(civicDecision_);
 
     auto& reg = controller_.registry();
-    reg.registerSystem("energy",      energySys_);
-    reg.registerSystem("information", infoSys_);
-    reg.registerSystem("entity",      entitySys_);
-    reg.registerSystem("environment", envSys_);
-    reg.registerSystem("interaction", interactionSys_);
+    reg.registerSystem("energy",       energySys_);
+    reg.registerSystem("information",  infoSys_);
+    reg.registerSystem("entity",       entitySys_);
+    reg.registerSystem("environment",  envSys_);
+    reg.registerSystem("civilization", civilizationSys_);
+    reg.registerSystem("interaction",  interactionSys_);
 
     controller_.initSystems();
 
-    observer_ = std::make_unique<WorldObserver>(bus, *energySys_, *entitySys_, *envSys_);
+    observer_ = std::make_unique<WorldObserver>(bus, *energySys_, *entitySys_, *envSys_, civilizationSys_.get());
     observer_->setTerminalEnabled(terminalObserverEnabled_);
+
+    const std::size_t settlementX = envSys_->grid().width() > 0 ? envSys_->grid().width() / 2 : 0;
+    const std::size_t settlementY = envSys_->grid().height() > 0 ? envSys_->grid().height() / 2 : 0;
+    civilizationSys_->foundSettlement(settlementName_, settlementX, settlementY, initialPopulation_);
 
     double initialEnergy = cfg.getDouble("initial_energy", 100.0);
     uint64_t poolId = energySys_->createPool(initialEnergy, initialEnergy);
@@ -113,6 +152,8 @@ bool Application::init(int argc, char* argv[]) {
 
     controller_.logger().log("App", "Simulation initialised - MVB ready.");
     controller_.logger().log("App", "Influence mode: " + playerInfluenceModeName(influenceMode_));
+    controller_.logger().log("App", "Civic decision: " + CivilizationSystem::decisionName(civicDecision_));
+    controller_.logger().log("App", "Settlement: " + settlementName_);
     return true;
 }
 
