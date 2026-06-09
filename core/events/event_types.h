@@ -17,6 +17,12 @@ enum class EventType : uint8_t {
     TickEnd,
     PlayerInfluenceApplied,
     WorldSnapshotCaptured,
+    SettlementFounded,
+    SettlementUpdated,
+    CivilizationDecisionApplied,
+    SeasonAdvanced,
+    LandUseChanged,
+    TechnologyAdvanced,
 };
 
 struct SimEvent {

@@ -37,6 +37,36 @@ std::string WorldSnapshot::toJson() const {
     out << "\"entityCount\":" << entityCount << ",";
     out << "\"influenceMode\":\"" << escapeJson(influenceMode) << "\",";
 
+    out << "\"civilization\":{";
+    out << "\"season\":\"" << escapeJson(season) << "\",";
+    out << "\"year\":" << year << ",";
+    out << "\"rainfallIndex\":" << rainfallIndex << ",";
+    out << "\"foodProductionIndex\":" << foodProductionIndex << ",";
+    out << "\"averageSoilFertility\":" << averageSoilFertility << ",";
+    out << "\"averageForestCover\":" << averageForestCover << ",";
+    out << "\"averageDesertification\":" << averageDesertification << ",";
+    out << "\"decision\":\"" << escapeJson(civicDecision) << "\",";
+    out << "\"settlements\":[";
+    for (std::size_t i = 0; i < settlements.size(); ++i) {
+        const auto& s = settlements[i];
+        if (i) out << ",";
+        out << "{";
+        out << "\"id\":" << s.id << ",";
+        out << "\"name\":\"" << escapeJson(s.name) << "\",";
+        out << "\"x\":" << s.x << ",";
+        out << "\"y\":" << s.y << ",";
+        out << "\"population\":" << s.population << ",";
+        out << "\"food\":" << s.food << ",";
+        out << "\"water\":" << s.water << ",";
+        out << "\"morale\":" << s.morale << ",";
+        out << "\"health\":" << s.health << ",";
+        out << "\"technology\":" << s.technology << ",";
+        out << "\"lastDecision\":\"" << escapeJson(s.lastDecision) << "\",";
+        out << "\"pressure\":\"" << escapeJson(s.pressure) << "\"";
+        out << "}";
+    }
+    out << "]},";
+
     out << "\"resources\":[";
     for (std::size_t i = 0; i < resources.size(); ++i) {
         if (i) out << ",";

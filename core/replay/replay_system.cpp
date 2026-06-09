@@ -112,17 +112,23 @@ const std::vector<TickRecord>& ReplaySystem::records() const {
 
 std::string ReplaySystem::eventTypeName(EventType type) {
     switch (type) {
-        case EventType::EnergyTransfer:         return "EnergyTransfer";
-        case EventType::EntitySpawned:          return "EntitySpawned";
-        case EventType::EntityDestroyed:        return "EntityDestroyed";
-        case EventType::EntityAction:           return "EntityAction";
-        case EventType::InteractionResolved:    return "InteractionResolved";
-        case EventType::StateCommitted:         return "StateCommitted";
-        case EventType::TickBegin:              return "TickBegin";
-        case EventType::TickEnd:                return "TickEnd";
-        case EventType::PlayerInfluenceApplied: return "PlayerInfluenceApplied";
-        case EventType::WorldSnapshotCaptured:  return "WorldSnapshotCaptured";
-        default:                                return "Unknown";
+        case EventType::EnergyTransfer:               return "EnergyTransfer";
+        case EventType::EntitySpawned:                return "EntitySpawned";
+        case EventType::EntityDestroyed:              return "EntityDestroyed";
+        case EventType::EntityAction:                 return "EntityAction";
+        case EventType::InteractionResolved:          return "InteractionResolved";
+        case EventType::StateCommitted:               return "StateCommitted";
+        case EventType::TickBegin:                    return "TickBegin";
+        case EventType::TickEnd:                      return "TickEnd";
+        case EventType::PlayerInfluenceApplied:       return "PlayerInfluenceApplied";
+        case EventType::WorldSnapshotCaptured:        return "WorldSnapshotCaptured";
+        case EventType::SettlementFounded:            return "SettlementFounded";
+        case EventType::SettlementUpdated:            return "SettlementUpdated";
+        case EventType::CivilizationDecisionApplied:  return "CivilizationDecisionApplied";
+        case EventType::SeasonAdvanced:               return "SeasonAdvanced";
+        case EventType::LandUseChanged:               return "LandUseChanged";
+        case EventType::TechnologyAdvanced:           return "TechnologyAdvanced";
+        default:                                      return "Unknown";
     }
 }
 

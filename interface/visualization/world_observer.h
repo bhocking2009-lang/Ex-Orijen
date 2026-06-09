@@ -12,12 +12,15 @@
 #include <string>
 #include <vector>
 
+class CivilizationSystem;
+
 class WorldObserver {
 public:
     WorldObserver(EventBus& bus,
                   const EnergySystem& energySystem,
                   const EntitySystem& entitySystem,
                   const EnvironmentSystem& environmentSystem,
+                  const CivilizationSystem* civilizationSystem = nullptr,
                   std::size_t maxRecentEvents = 8);
 
     void setTerminalEnabled(bool enabled);
@@ -31,6 +34,7 @@ private:
     const EnergySystem& energySystem_;
     const EntitySystem& entitySystem_;
     const EnvironmentSystem& environmentSystem_;
+    const CivilizationSystem* civilizationSystem_;
     std::size_t maxRecentEvents_;
     bool terminalEnabled_;
     TerminalObserver terminalObserver_;
