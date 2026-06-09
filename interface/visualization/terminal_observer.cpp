@@ -17,15 +17,42 @@ std::string TerminalObserver::render(const WorldSnapshot& snapshot) const {
         }
     }
 
+    for (const auto& settlement : snapshot.settlements) {
+        if (settlement.x < snapshot.gridWidth && settlement.y < snapshot.gridHeight) {
+            rows[settlement.y][settlement.x] = 'S';
+        }
+    }
+
     std::ostringstream out;
     out << "[OBSERVE] tick=" << snapshot.tick
         << " mode=" << snapshot.influenceMode
         << " energy=" << snapshot.totalEnergy
         << " resource=" << snapshot.totalResource
-        << " entities=" << snapshot.entityCount << "\n";
+        << " entities=" << snapshot.entityCount;
+    if (!snapshot.civicDecision.empty() || !snapshot.settlements.empty()) {
+        out << " season=" << snapshot.season
+            << " year=" << snapshot.year
+            << " decision=" << snapshot.civicDecision
+            << " rain=" << snapshot.rainfallIndex
+            << " soil=" << snapshot.averageSoilFertility
+            << " forest=" << snapshot.averageForestCover
+            << " desert=" << snapshot.averageDesertification;
+    }
+    out << "\n";
 
     for (const auto& row : rows) {
         out << row << "\n";
+    }
+
+    if (!snapshot.settlements.empty()) {
+        const auto& s = snapshot.settlements.front();
+        out << "settlement#" << s.id
+            << " name=" << s.name
+            << " pop=" << s.population
+            << " food=" << s.food
+            << " water=" << s.water
+            << " pressure=" << s.pressure
+            << " decision=" << s.lastDecision << "\n";
     }
 
     if (!snapshot.entities.empty()) {
