@@ -1,5 +1,6 @@
 #include "world_observer.h"
 #include "../../core/influence/player_influence.h"
+#include "../../systems/civilization/civilization_system.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -8,11 +9,13 @@ WorldObserver::WorldObserver(EventBus& bus,
                              const EnergySystem& energySystem,
                              const EntitySystem& entitySystem,
                              const EnvironmentSystem& environmentSystem,
+                             const CivilizationSystem* civilizationSystem,
                              std::size_t maxRecentEvents)
     : bus_(bus),
       energySystem_(energySystem),
       entitySystem_(entitySystem),
       environmentSystem_(environmentSystem),
+      civilizationSystem_(civilizationSystem),
       maxRecentEvents_(maxRecentEvents),
       terminalEnabled_(false) {
     const EventType types[] = {
@@ -26,6 +29,12 @@ WorldObserver::WorldObserver(EventBus& bus,
         EventType::TickEnd,
         EventType::PlayerInfluenceApplied,
         EventType::WorldSnapshotCaptured,
+        EventType::SettlementFounded,
+        EventType::SettlementUpdated,
+        EventType::CivilizationDecisionApplied,
+        EventType::SeasonAdvanced,
+        EventType::LandUseChanged,
+        EventType::TechnologyAdvanced,
     };
 
     for (EventType type : types) {
@@ -84,6 +93,32 @@ void WorldObserver::capture(uint64_t tick) {
                                      e.lastAction, e.memorySignal, e.age});
     }
 
+    if (civilizationSystem_) {
+        snapshot.season = civilizationSystem_->seasonName();
+        snapshot.year = civilizationSystem_->year();
+        snapshot.rainfallIndex = civilizationSystem_->rainfallIndex();
+        snapshot.foodProductionIndex = civilizationSystem_->foodProductionIndex();
+        snapshot.averageSoilFertility = civilizationSystem_->averageSoilFertility();
+        snapshot.averageForestCover = civilizationSystem_->averageForestCover();
+        snapshot.averageDesertification = civilizationSystem_->averageDesertification();
+        snapshot.civicDecision = civilizationSystem_->decisionName();
+
+        for (const auto& settlement : civilizationSystem_->settlements()) {
+            snapshot.settlements.push_back({settlement.id,
+                                            settlement.name,
+                                            settlement.x,
+                                            settlement.y,
+                                            settlement.population,
+                                            settlement.food,
+                                            settlement.water,
+                                            settlement.morale,
+                                            settlement.health,
+                                            settlement.technology,
+                                            settlement.lastDecision,
+                                            settlement.pressure});
+        }
+    }
+
     for (const auto& eventText : recentEvents_) {
         snapshot.recentEvents.push_back(eventText);
     }
@@ -105,17 +140,23 @@ void WorldObserver::rememberEvent(const SimEvent& event) {
 std::string WorldObserver::describeEvent(const SimEvent& event) const {
     std::ostringstream out;
     switch (event.type) {
-        case EventType::EnergyTransfer:          out << "energy"; break;
-        case EventType::EntitySpawned:           out << "spawn"; break;
-        case EventType::EntityDestroyed:         out << "destroy"; break;
-        case EventType::EntityAction:            out << "action"; break;
-        case EventType::InteractionResolved:     out << "interaction"; break;
-        case EventType::StateCommitted:          out << "state"; break;
-        case EventType::TickBegin:               out << "tick_begin"; break;
-        case EventType::TickEnd:                 out << "tick_end"; break;
-        case EventType::PlayerInfluenceApplied:  out << "influence"; break;
-        case EventType::WorldSnapshotCaptured:   out << "snapshot"; break;
-        default:                                 out << "event"; break;
+        case EventType::EnergyTransfer:              out << "energy"; break;
+        case EventType::EntitySpawned:               out << "spawn"; break;
+        case EventType::EntityDestroyed:             out << "destroy"; break;
+        case EventType::EntityAction:                out << "action"; break;
+        case EventType::InteractionResolved:         out << "interaction"; break;
+        case EventType::StateCommitted:              out << "state"; break;
+        case EventType::TickBegin:                   out << "tick_begin"; break;
+        case EventType::TickEnd:                     out << "tick_end"; break;
+        case EventType::PlayerInfluenceApplied:      out << "influence"; break;
+        case EventType::WorldSnapshotCaptured:       out << "snapshot"; break;
+        case EventType::SettlementFounded:           out << "settlement_founded"; break;
+        case EventType::SettlementUpdated:           out << "settlement"; break;
+        case EventType::CivilizationDecisionApplied: out << "decision"; break;
+        case EventType::SeasonAdvanced:              out << "season"; break;
+        case EventType::LandUseChanged:              out << "land"; break;
+        case EventType::TechnologyAdvanced:          out << "technology"; break;
+        default:                                     out << "event"; break;
     }
     out << ":" << event.sourceId << "->" << event.targetId
         << " value=" << event.value;
