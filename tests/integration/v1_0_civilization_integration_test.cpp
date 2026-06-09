@@ -121,10 +121,12 @@ void test_decision_consequences() {
     rotateEnv.init();
     rotateCiv.init();
     rotateCiv.foundSettlement("Rotation Test", 2, 2, 80.0);
+    rotateCiv.setDecision(CivicDecision::ExpandFarms);
+    rotateCiv.update();
     const float rotationSoilBefore = rotateCiv.averageSoilFertility();
     rotateCiv.setDecision(CivicDecision::RotateCrops);
     rotateCiv.update();
-    TEST("v1.0: crop rotation improves soil", rotateCiv.averageSoilFertility() > rotationSoilBefore);
+    TEST("v1.0: crop rotation improves depleted soil", rotateCiv.averageSoilFertility() > rotationSoilBefore);
 
     TEST("v1.0: decision parser accepts player terms", CivilizationSystem::parseDecision("deforest") == CivicDecision::ClearForest);
     TEST("v1.0: decision parser defaults safely", CivilizationSystem::parseDecision("unknown") == CivicDecision::Stewardship);
