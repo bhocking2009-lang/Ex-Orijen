@@ -26,6 +26,7 @@ systems/entity/behavior_model.cpp
 systems/entity/entity_system.cpp
 systems/environment/world_grid.cpp
 systems/environment/environment_system.cpp
+systems/civilization/civilization_system.cpp
 systems/interaction/interaction_event.cpp
 systems/interaction/interaction_system.cpp
 interface/visualization/world_snapshot.cpp
@@ -57,6 +58,12 @@ core/simulation/simulation_controller.cpp
 $COMMON_SOURCES
 "
 
+CIVILIZATION_TEST_SOURCES="
+tests/integration/v1_0_civilization_integration_test.cpp
+core/simulation/simulation_controller.cpp
+$COMMON_SOURCES
+"
+
 SMOKE_SOURCES="
 tests/smoke_tests.cpp
 core/tick_system/tick_manager.cpp
@@ -75,7 +82,10 @@ echo "[verify] Running default 10-tick MVB"
 "$OUT_DIR/ex_origine" --ticks 10
 
 echo "[verify] Running 100-tick observable loop"
-"$OUT_DIR/ex_origine" --ticks 100 --mode attract --snapshot runtime/replays/verify_world.jsonl --replay runtime/replays/verify_events.replay
+"$OUT_DIR/ex_origine" --ticks 100 --mode attract --decision rotate_crops --snapshot runtime/replays/verify_world.jsonl --replay runtime/replays/verify_events.replay
+
+echo "[verify] Running 24-tick civilization observer loop"
+"$OUT_DIR/ex_origine" --ticks 24 --decision manage_water --settlement VerifyTown --population 150 --observe --snapshot runtime/replays/verify_civilization_world.jsonl --replay runtime/replays/verify_civilization_events.replay
 
 echo "[verify] Checking missing config fails"
 if "$OUT_DIR/ex_origine" --config data/configs/no_such_config.json --ticks 1; then
@@ -95,8 +105,12 @@ echo "[verify] Building and running v0.6 observer integration test"
 $CXX $STD -I. $OBSERVER_TEST_SOURCES -o "$OUT_DIR/v0_6_observer_integration_test"
 "$OUT_DIR/v0_6_observer_integration_test"
 
+echo "[verify] Building and running v1.0 civilization integration test"
+$CXX $STD -I. $CIVILIZATION_TEST_SOURCES -o "$OUT_DIR/v1_0_civilization_integration_test"
+"$OUT_DIR/v1_0_civilization_integration_test"
+
 echo "[verify] Building and running legacy smoke tests"
 $CXX $STD -I. $SMOKE_SOURCES -o "$OUT_DIR/smoke_tests"
 "$OUT_DIR/smoke_tests"
 
-echo "[verify] v0.2-v0.6 closeout checks passed"
+echo "[verify] v0.2-v1.0 closeout checks passed"
