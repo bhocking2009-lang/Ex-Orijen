@@ -22,6 +22,7 @@ $commonSources = @(
     'systems/entity/entity_system.cpp',
     'systems/environment/world_grid.cpp',
     'systems/environment/environment_system.cpp',
+    'systems/civilization/civilization_system.cpp',
     'systems/interaction/interaction_event.cpp',
     'systems/interaction/interaction_system.cpp',
     'interface/visualization/world_snapshot.cpp',
@@ -44,6 +45,11 @@ $mvbTestSources = @(
 
 $observerTestSources = @(
     'tests/integration/v0_6_observer_integration_test.cpp',
+    'core/simulation/simulation_controller.cpp'
+) + $commonSources
+
+$civilizationTestSources = @(
+    'tests/integration/v1_0_civilization_integration_test.cpp',
     'core/simulation/simulation_controller.cpp'
 ) + $commonSources
 
@@ -116,11 +122,13 @@ $appExe = Join-Path $outDir 'ex_origine.exe'
 $unitExe = Join-Path $outDir 'core_unit_tests.exe'
 $mvbExe = Join-Path $outDir 'mvb_integration_test.exe'
 $observerExe = Join-Path $outDir 'v0_6_observer_integration_test.exe'
+$civilizationExe = Join-Path $outDir 'v1_0_civilization_integration_test.exe'
 $smokeExe = Join-Path $outDir 'smoke_tests.exe'
 
 Invoke-Compile 'Building MVB executable' $appSources $appExe
 Invoke-Step 'Running default 10-tick MVB' { & $appExe '--ticks' '10' }
-Invoke-Step 'Running 100-tick observable loop' { & $appExe '--ticks' '100' '--mode' 'attract' '--snapshot' 'runtime/replays/verify_world.jsonl' '--replay' 'runtime/replays/verify_events.replay' }
+Invoke-Step 'Running 100-tick observable loop' { & $appExe '--ticks' '100' '--mode' 'attract' '--decision' 'rotate_crops' '--snapshot' 'runtime/replays/verify_world.jsonl' '--replay' 'runtime/replays/verify_events.replay' }
+Invoke-Step 'Running 24-tick civilization observer loop' { & $appExe '--ticks' '24' '--decision' 'manage_water' '--settlement' 'VerifyTown' '--population' '150' '--observe' '--snapshot' 'runtime/replays/verify_civilization_world.jsonl' '--replay' 'runtime/replays/verify_civilization_events.replay' }
 
 Write-Host '[verify] Checking missing config fails'
 & $appExe '--config' 'data/configs/no_such_config.json' '--ticks' '1'
@@ -137,7 +145,10 @@ Invoke-Step 'Running MVB integration test' { & $mvbExe }
 Invoke-Compile 'Building v0.6 observer integration test' $observerTestSources $observerExe
 Invoke-Step 'Running v0.6 observer integration test' { & $observerExe }
 
+Invoke-Compile 'Building v1.0 civilization integration test' $civilizationTestSources $civilizationExe
+Invoke-Step 'Running v1.0 civilization integration test' { & $civilizationExe }
+
 Invoke-Compile 'Building legacy smoke tests' $smokeSources $smokeExe
 Invoke-Step 'Running legacy smoke tests' { & $smokeExe }
 
-Write-Host '[verify] v0.2-v0.6 closeout checks passed'
+Write-Host '[verify] v0.2-v1.0 closeout checks passed'
