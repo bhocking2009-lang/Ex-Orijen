@@ -18,7 +18,7 @@ jobs:
       - name: Show compiler
         run: g++ --version
 
-      - name: Run v0.6 verification
+      - name: Run v1.0 verification
         run: |
-          chmod +x scripts/verify_v0_6.sh scripts/verify_v0_1.sh
-          ./scripts/verify_v0_6.sh
+          chmod +x scripts/verify_v1_0.sh scripts/verify_v0_6.sh scripts/verify_v0_1.sh
+          ./scripts/verify_v1_0.sh
