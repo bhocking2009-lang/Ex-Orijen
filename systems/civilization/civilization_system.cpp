@@ -50,6 +50,7 @@ void CivilizationSystem::update() {
     }
 
     updateLand();
+    bus_.publish({EventType::LandUseChanged, 0, 0, averageDesertification(), decisionName()});
 
     for (auto& settlement : settlements_) {
         updateSettlement(settlement);
@@ -91,8 +92,8 @@ uint64_t CivilizationSystem::foundSettlement(const std::string& name,
     settlement.x = std::min(x, width - 1);
     settlement.y = std::min(y, height - 1);
     settlement.population = std::max(1.0, population);
-    settlement.food = population * 1.2;
-    settlement.water = population * 1.2;
+    settlement.food = settlement.population * 1.2;
+    settlement.water = settlement.population * 1.2;
     settlements_.push_back(settlement);
     bus_.publish({EventType::SettlementFounded, settlement.id, 0, settlement.population, settlement.name});
     return settlement.id;
