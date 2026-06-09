@@ -63,6 +63,12 @@ void SimulationController::wireReplay() {
         EventType::TickEnd,
         EventType::PlayerInfluenceApplied,
         EventType::WorldSnapshotCaptured,
+        EventType::SettlementFounded,
+        EventType::SettlementUpdated,
+        EventType::CivilizationDecisionApplied,
+        EventType::SeasonAdvanced,
+        EventType::LandUseChanged,
+        EventType::TechnologyAdvanced,
     };
 
     for (EventType type : types) {
